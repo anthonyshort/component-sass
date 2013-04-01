@@ -7,7 +7,7 @@ module.exports = function(builder) {
   builder.hook('before styles', function(pkg, next) {
 
     // No styles in this package
-    if(!pkg.conf.styles) return next();
+    if(pkg.root !== true || !pkg.conf.styles) return next();
 
     // Get all the coffee files from the scripts list
     var sassfiles = pkg.conf.styles.filter(function(file){
@@ -17,18 +17,25 @@ module.exports = function(builder) {
     // No sass files
     if( sassfiles.length === 0 ) return next();
 
+    // Sass load paths
+    var loadPaths = (pkg.conf.paths || []).map(function(dir){ return path.resolve(pkg.dir, dir) }).concat(pkg.path('components'));
+
     // Get the real path for each file relative to the package
     var realSassFiles = sassfiles.map(pkg.path);
 
     // Function to compile sass files that will include the package
     // load paths as Sass load paths
-    var compileSassFile = function(buffer, callback) {
-       sass.render(buffer.toString(), callback, { includePaths: pkg.conf.paths });
+    var compileSassFile = function(str, callback) {
+       sass.render(str, callback, { includePaths: loadPaths });
     };
 
     // Read all the sass files
     async.map(sassfiles, fs.readFile, function(err, results){
       if(err) return next(err);
+
+      results = results.map(function(data, i){
+        return data.toString();
+      });
 
       // Compile them all
       async.map(results, compileSassFile, function(err, compiledFiles){
