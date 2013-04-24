@@ -21,7 +21,8 @@ module.exports = function(builder) {
     var loadPaths = (pkg.config.paths || []).map(pkg.path).concat(pkg.path('components'));
 
     // Get the real path for each file relative to the package
-    var realSassFiles = sassfiles.map(pkg.path);
+    // Must pass in package as context to make sure we have the correct context
+    var realSassFiles = sassfiles.map(pkg.path, pkg);
 
     // Function to compile sass files that will include the package
     // load paths as Sass load paths
