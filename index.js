@@ -1,16 +1,16 @@
 var sass = require('node-sass');
 var path = require('path');
 var fs = require('fs');
-var async = require('async')
+var async = require('async');
 
 module.exports = function(builder) {
   builder.hook('before styles', function(pkg, next) {
 
     // No styles in this package
-    if(pkg.root !== true || !pkg.conf.styles) return next();
+    if(pkg.root !== true || !pkg.config.styles) return next();
 
     // Get all the coffee files from the scripts list
-    var sassfiles = pkg.conf.styles.filter(function(file){
+    var sassfiles = pkg.config.styles.filter(function(file){
       return path.extname(file) === '.scss';
     });
 
@@ -18,10 +18,11 @@ module.exports = function(builder) {
     if( sassfiles.length === 0 ) return next();
 
     // Sass load paths
-    var loadPaths = (pkg.conf.paths || []).map(pkg.path).concat(pkg.path('components'));
+    var loadPaths = (pkg.config.paths || []).map(pkg.path).concat(pkg.path('components'));
 
     // Get the real path for each file relative to the package
-    var realSassFiles = sassfiles.map(pkg.path);
+    // Must pass in package as context to make sure we have the correct context
+    var realSassFiles = sassfiles.map(pkg.path, pkg);
 
     // Function to compile sass files that will include the package
     // load paths as Sass load paths
@@ -45,7 +46,7 @@ module.exports = function(builder) {
           pkg.addFile('styles', sassfiles[i], data);
           pkg.removeFile('styles', sassfiles[i]);
         });
-       
+
         next();
       });
     });
