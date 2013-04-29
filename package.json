@@ -1,6 +1,6 @@
 {
   "name": "component-sass",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "Sass plugin for component-build",
   "main": "index.js",
   "scripts": {},
@@ -16,5 +16,8 @@
   "dependencies": {
     "node-sass": "~0.4.0",
     "async": "~0.2.6"
+  },
+  "peerDependencies": {
+    "component": ">= 0.14"
   }
 }
